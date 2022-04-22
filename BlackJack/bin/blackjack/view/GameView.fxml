@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="540.0" prefWidth="960.0" styleClass="gameview" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="blackjack.view.GameViewController">
+   <bottom>
+      <ButtonBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="50.0" BorderPane.alignment="CENTER">
+        <buttons>
+          <Button fx:id="butEndSelfTurn" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionEndSelfTurn" styleClass="buttonVertMoyen" text="Terminer son tour" translateX="-5.0">
+          </Button>
+          <Button fx:id="butGetSelfCard" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionDrawACard" styleClass="buttonVertMoyen" text="Demander une carte" translateX="-5.0">
+          </Button>
+          <Button fx:id="butStart" alignment="CENTER" contentDisplay="CENTER" disable="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#actionStart" prefWidth="300.0" styleClass="buttonVertMoyen" text="Lancer manche" translateX="-5.0">
+          </Button>
+        </buttons>
+         <BorderPane.margin>
+            <Insets left="15.0" />
+         </BorderPane.margin>
+      </ButtonBar>
+   </bottom>
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+            <Menu fx:id="menuThemes" mnemonicParsing="false" text="Thème">
+              <items>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Clair">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="theme" />
+                     </toggleGroup>
+                  </RadioMenuItem>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Sombre" toggleGroup="$theme" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Bee" toggleGroup="$theme" />
+                <Menu mnemonicParsing="false" text="A" visible="false">
+                     <items>
+                        <Menu mnemonicParsing="false" text="M">
+                           <items>
+                              <Menu mnemonicParsing="false" text="O">
+                                 <items>
+                                    <Menu mnemonicParsing="false" text="N">
+                                      <items>
+                                          <Menu mnemonicParsing="false" text="G">
+                                             <items>
+                                                <Menu mnemonicParsing="false" text="U">
+                                                  <items>
+                                                      <RadioMenuItem mnemonicParsing="false" text="S" toggleGroup="$theme" />
+                                                  </items>
+                                                </Menu>
+                                             </items>
+                                          </Menu>
+                                      </items>
+                                    </Menu>
+                                 </items>
+                              </Menu>
+                           </items>
+                        </Menu>
+                     </items>
+                </Menu>
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Aide">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="À propos de BlackJack" />
+              </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+      <VBox maxWidth="-Infinity" prefWidth="960.0" BorderPane.alignment="CENTER">
+         <children>
+            <GridPane alignment="CENTER" maxWidth="-Infinity" prefHeight="220.0" prefWidth="960.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                  <RowConstraints />
+              </rowConstraints>
+               <children>
+                  <Button mnemonicParsing="false" onAction="#actionGoBackToMain" prefWidth="124.0" styleClass="buttonVertMoyen" text="Retour" textAlignment="CENTER" translateY="-84.0">
+                     <GridPane.margin>
+                        <Insets left="7.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <ImageView fitHeight="220.0" fitWidth="391.0" pickOnBounds="true" preserveRatio="true" translateX="-35.0" GridPane.columnIndex="1">
+                     <image>
+                        <Image url="@../resource/luigi.jpg" />
+                     </image></ImageView>
+                  <ImageView fitHeight="115.0" fitWidth="541.0" pickOnBounds="true" preserveRatio="true" translateX="125.0" translateY="25.0">
+                     <image>
+                        <Image url="@../resource/bulle.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="dealerMessageLab" alignment="CENTER" contentDisplay="CENTER" prefHeight="75.0" prefWidth="210.0" styleClass="croupierLabN" text="Au moins un joueur doit miser pour lancer une manche" textAlignment="CENTER" translateX="140.0" translateY="25.0" wrapText="true">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                     <children>
+                        <Label fx:id="dealerHandLab" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="284.0" styleClass="croupierLabB" text="Main du croupier" textFill="#ffffffe5" visible="false">
+                           <VBox.margin>
+                              <Insets left="36.0" top="9.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextArea fx:id="dealerHandTA" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="175.0" prefWidth="150.0" styleClass="playerVBox" translateX="103.0" visible="false" wrapText="true" />
+                     </children>
+                  </VBox>
+               </children>
+            </GridPane>
+            <HBox fx:id="playersHBox" alignment="CENTER" maxWidth="-Infinity" prefWidth="960.0" />
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

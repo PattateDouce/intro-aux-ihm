@@ -1,0 +1,8 @@
+- Bugs :
+	- investiguer les bugs de sons (aller voir les bonnes pratiques)
+
+- Ajouts :
+	- mettre en option le langage de l'application
+	- expliquer les règles
+	- ajouter des règles
+	- ajouter des bruitages

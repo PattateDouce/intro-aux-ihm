@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gestclub.view.ListeMembreController">
+   <bottom>
+      <ButtonBar maxWidth="-Infinity" prefHeight="40.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+        <buttons>
+            <Button fx:id="butNew" mnemonicParsing="false" onAction="#actionNew" text="Nouveau membre" translateX="-5.0" />
+          <Button fx:id="butEdit" disable="true" mnemonicParsing="false" onAction="#actionEdit" text="Editer" translateX="-5.0" />
+            <Button fx:id="butDel" disable="true" mnemonicParsing="false" onAction="#actionDel" text="Supprimer" translateX="-5.0" />
+        </buttons>
+      </ButtonBar>
+   </bottom>
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+            <Menu mnemonicParsing="false" styleClass="menu" text="Fichiers">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#actionRestore" text="Ouvrir..." />
+                  <MenuItem mnemonicParsing="false" onAction="#actionSave" text="Sauvegarder sous..." />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#actionQuitter" text="Quitter GestClub" />
+              </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Membre">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#actionNew" text="Nouveau" />
+                  <MenuItem fx:id="miEdit" disable="true" mnemonicParsing="false" onAction="#actionEdit" text="Éditer" />
+              <MenuItem fx:id="miDel" disable="true" mnemonicParsing="false" onAction="#actionDel" text="Supprimer" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Thème">
+               <items>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemeBright" selected="true" text="Clair">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="theme" />
+                     </toggleGroup></RadioMenuItem>
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemeRed" text="Red" toggleGroup="$theme" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemeBee" text="Bee" toggleGroup="$theme" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemeSky" text="Sky" toggleGroup="$theme" />
+               </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Aide">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="À propos de GestClub" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="500.0" text="Gestion des membres">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Label>
+            <ListView fx:id="listview" styleClass="listview" />
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
