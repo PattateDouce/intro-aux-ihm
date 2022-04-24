@@ -1,7 +1,19 @@
-h1, h4, p {
+html {
+	/* background-color: rgb(192, 192, 192); */
+	/* background-color: rgb(0, 100, 25); */
+	/* background-color: rgb(14, 90, 33); */
+	background-color: rgb(1, 81, 20);
+	color: #7bb94b;
+}
+
+h1, h3, p {
 	text-align: center;
 }
 
-html {
-	background-color: rgb(192, 192, 192);
+a {
+	color: #7bb94b;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
 }

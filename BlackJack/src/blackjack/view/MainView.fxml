@@ -6,8 +6,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.RadioMenuItem?>
-<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -16,20 +14,10 @@
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu fx:id="menuThemes" mnemonicParsing="false" text="Thème">
-               <items>
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Clair">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="theme" />
-                     </toggleGroup>
-                  </RadioMenuItem>
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Sombre" toggleGroup="$theme" />
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Bee" toggleGroup="$theme" />
-               </items>
-          </Menu>
           <Menu mnemonicParsing="false" text="Aide">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="À propos de BlackJack" />
+                  <MenuItem mnemonicParsing="false" onAction="#actionRules" text="Règles" />
+              <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="À propos" />
             </items>
           </Menu>
         </menus>
@@ -38,7 +26,7 @@
    <bottom>
       <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="195.0" prefWidth="640.0" BorderPane.alignment="CENTER">
          <children>
-            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionStart" prefWidth="200.0" styleClass="buttonVertGrand" text="Jouer" textAlignment="CENTER" textFill="#a2e76d">
+            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionStart" prefWidth="200.0" styleClass="buttonGreenBig" text="Jouer" textAlignment="CENTER" textFill="#a2e76d">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
@@ -49,7 +37,7 @@
                   <Font name="Miriam Mono CLM Bold" size="24.0" />
                </font>
             </Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionSettings" prefWidth="200.0" styleClass="buttonVertGrand" text="Paramètres" textAlignment="CENTER" textFill="#a2e76d">
+            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionSettings" prefWidth="200.0" styleClass="buttonGreenBig" text="Paramètres" textAlignment="CENTER" textFill="#a2e76d">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
@@ -60,7 +48,7 @@
                   <Font name="Miriam Mono CLM Bold" size="24.0" />
                </font>
             </Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionQuit" prefWidth="200.0" styleClass="buttonVertGrand" text="Quitter" textAlignment="CENTER" textFill="#a2e76d">
+            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#actionQuit" prefWidth="200.0" styleClass="buttonGreenBig" text="Quitter" textAlignment="CENTER" textFill="#a2e76d">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>

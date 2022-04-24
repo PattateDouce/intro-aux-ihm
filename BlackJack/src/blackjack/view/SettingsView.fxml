@@ -25,7 +25,6 @@
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
@@ -44,13 +43,6 @@
                <font>
                   <Font size="18.0" />
                </font></Label>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="320.0" text="Thème" textFill="WHITE" GridPane.rowIndex="2">
-               <GridPane.margin>
-                  <Insets />
-               </GridPane.margin>
-               <font>
-                  <Font size="18.0" />
-               </font></Label>
             <HBox fx:id="defaultBalance" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
                <children>
                   <Slider max="10000.0" min="1.0" prefHeight="14.0" prefWidth="260.0" value="1000.0">
@@ -61,7 +53,7 @@
                         <Cursor fx:constant="H_RESIZE" />
                      </cursor>
                   </Slider>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="10 000" textFill="WHITE">
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="solde" textFill="WHITE">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -81,7 +73,7 @@
                         <Insets />
                      </HBox.margin>
                   </Slider>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="10" textFill="WHITE">
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="mise" textFill="WHITE">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -91,31 +83,17 @@
                   </Label>
                </children>
             </HBox>
-            <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" styleClass="buttonVertPetit" text="Choix du thème" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2">
-              <items>
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Clair">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="theme" />
-                     </toggleGroup>
-                  </RadioMenuItem>
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Sombre" toggleGroup="$theme" />
-                  <RadioMenuItem mnemonicParsing="false" onAction="#actionThemes" text="Bee" toggleGroup="$theme" />
-              </items>
-               <GridPane.margin>
-                  <Insets left="91.0" />
-               </GridPane.margin>
-            </MenuButton>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="320.0" text="Volume de la musique d'arrière plan" textFill="WHITE" GridPane.rowIndex="3">
+            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="320.0" text="Volume de la musique d'arrière plan" textFill="WHITE" GridPane.rowIndex="2">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="320.0" text="Musique d'arrière plan" textFill="WHITE" GridPane.rowIndex="4">
+            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="320.0" text="Musique d'arrière plan" textFill="WHITE" GridPane.rowIndex="3">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" styleClass="buttonVertPetit" text="Choix de la musique" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" styleClass="buttonGreenLittle" text="Choix de la musique" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <items>
                   <RadioMenuItem mnemonicParsing="false" onAction="#actionMusic" text="Originale">
                      <toggleGroup>
@@ -129,7 +107,7 @@
                   <Insets left="72.0" />
                </GridPane.margin>
             </MenuButton>
-            <HBox fx:id="volume" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <HBox fx:id="volume" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <children>
                   <Slider prefWidth="260.0" value="100.0">
                      <cursor>
@@ -139,7 +117,7 @@
                         <Insets />
                      </HBox.margin>
                   </Slider>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="100 %" textFill="WHITE">
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="60.0" text="\%" textFill="WHITE">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -160,6 +138,6 @@
       </Label>
    </top>
    <bottom>
-      <Button mnemonicParsing="false" onAction="#actionBack" styleClass="buttonVertMoyen" text="Retour" translateY="-15.0" BorderPane.alignment="CENTER" />
+      <Button mnemonicParsing="false" onAction="#actionBack" styleClass="buttonGreenMedium" text="Retour" translateY="-15.0" BorderPane.alignment="CENTER" />
    </bottom>
 </BorderPane>

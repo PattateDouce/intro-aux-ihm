@@ -3,7 +3,7 @@ package blackjack.view;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import blackjack.Blackjack;
+import blackjack.Main;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -17,7 +17,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Stage;
+//import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 /**
@@ -38,8 +38,8 @@ public class SettingsViewController implements Initializable {
 	@FXML
 	private HBox volume;
 
-	@FXML
-	private ToggleGroup theme;
+//	@FXML
+//	private ToggleGroup theme;
 	
 	@FXML
 	private ToggleGroup music;
@@ -47,9 +47,9 @@ public class SettingsViewController implements Initializable {
 	/**
 	 * Attributs de la classe
 	 */
-	private Blackjack bj;
+	private Main bj;
 	
-	private Stage primaryStage;
+//	private Stage primaryStage;
 	
 	private IntegerProperty[] settings;
 	
@@ -62,10 +62,10 @@ public class SettingsViewController implements Initializable {
 	/** Révupère l'instance du programme principal pour plus tard pouvoir changer de scène
 	 * @param pfBj l'objet Blackjack
 	 */
-	public void setBj(Blackjack pfBj) {
+	public void setBj(Main pfBj) {
 		this.bj = pfBj;
 		
-		this.primaryStage = this.bj.getPrimaryStage();
+//		this.primaryStage = this.bj.getPrimaryStage();
 		
 		this.settings = this.bj.getSettings();
 		// Solde par défaut
@@ -83,42 +83,20 @@ public class SettingsViewController implements Initializable {
 		defaultBetSlider.valueProperty().bindBidirectional(this.settings[1]);
 		
 		// Thème
-		RadioMenuItem radioTheme = (RadioMenuItem) this.theme.getToggles().get(this.settings[2].getValue());
-		radioTheme.setSelected(true);
+//		RadioMenuItem radioTheme = (RadioMenuItem) this.theme.getToggles().get(this.settings[2].getValue());
+//		radioTheme.setSelected(true);
 		
 		// Volume
 		Slider volumeSlider = (Slider) this.volume.getChildren().get(0);
 		Label volumeLabel = (Label) this.volume.getChildren().get(1);
-		Bindings.bindBidirectional(volumeLabel.textProperty(), this.settings[3], new NumberStringConverter());
-		volumeSlider.valueProperty().bindBidirectional(this.settings[3]);
+		Bindings.bindBidirectional(volumeLabel.textProperty(), this.settings[2], new NumberStringConverter());
+		volumeSlider.valueProperty().bindBidirectional(this.settings[2]);
 		
 		// Musique de fond
-		RadioMenuItem radioMusic = (RadioMenuItem) this.music.getToggles().get(this.settings[4].getValue());
+		RadioMenuItem radioMusic = (RadioMenuItem) this.music.getToggles().get(this.settings[3].getValue());
 		radioMusic.setSelected(true);
 		
 		this.mediaPlayer = this.bj.getMediaPlayer();
-	}
-	
-	/**
-	 * Action liée aux RadioMenuItem permettant de charger le thème choisi
-	 */
-	@FXML
-	private void actionThemes() {
-		RadioMenuItem rad = (RadioMenuItem) this.theme.getSelectedToggle();
-		switch(rad.getText()) {
-			case("Clair"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/bright.css").toExternalForm());
-				this.settings[2].setValue(0);
-				return;
-			case("Sombre"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/dark.css").toExternalForm());
-				this.settings[2].setValue(1);
-				return;
-			case("Bee"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/flatbee.css").toExternalForm());
-				this.settings[2].setValue(2);
-				return;
-		}
 	}
 	
 	/**
@@ -131,15 +109,15 @@ public class SettingsViewController implements Initializable {
 		switch(rad.getText()) {
 			case("Originale"):
 				loadMusic("SM64DS Luigi's Casino Theme.m4a");
-				this.settings[4].setValue(0);
+				this.settings[3].setValue(0);
 				return;
 			case("Ralentie"):
 				loadMusic("SM64DS Luigi's Casino Theme Slowed & Reverb.m4a");
-				this.settings[4].setValue(1);
+				this.settings[3].setValue(1);
 				return;
 			case("Jazz"):
 				loadMusic("SM64DS Luigi’s Casino Theme Jazz Remix.m4a");
-				this.settings[4].setValue(2);
+				this.settings[3].setValue(2);
 				return;
 		}
 	}
@@ -148,13 +126,13 @@ public class SettingsViewController implements Initializable {
 	 * @param path Nom du ficher dans le package resource
 	 */
 	public void loadMusic(String path) {
-		Media media = new Media(Blackjack.class.getResource("resource/"+path).toExternalForm());
+		Media media = new Media(Main.class.getResource("resource/"+path).toExternalForm());
 		this.mediaPlayer = new MediaPlayer(media);
 		this.mediaPlayer.play();
 		this.mediaPlayer.setCycleCount(Integer.MAX_VALUE);
 		DoubleProperty doubleProp = new SimpleDoubleProperty(0.5);
 		this.mediaPlayer.volumeProperty().bind(doubleProp);
-		this.settings[3].addListener( (obs, oldval, newval) -> doubleProp.setValue(newval.intValue()/100.0) );
+		this.settings[2].addListener( (obs, oldval, newval) -> doubleProp.setValue(newval.intValue()/100.0) );
 	}
 	
 	/**

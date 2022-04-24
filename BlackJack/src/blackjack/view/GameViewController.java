@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import blackjack.Blackjack;
+import blackjack.Main;
 import blackjack.om.BlackBot;
 import blackjack.om.Carte;
 import blackjack.om.EtatBlackBot;
 import blackjack.om.MainBlackjack;
+import blackjack.util.Util;
 import javafx.beans.property.IntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,8 +33,6 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -46,11 +45,11 @@ public class GameViewController implements Initializable {
 	/**
 	 * Éléments dans le FXML
 	 */
-	@FXML
-	private Menu menuThemes;
+//	@FXML
+//	private Menu menuThemes;
 	
-	@FXML
-	private ToggleGroup theme;
+//	@FXML
+//	private ToggleGroup theme;
 	
 	@FXML
 	private Label dealerMessageLab;
@@ -76,7 +75,7 @@ public class GameViewController implements Initializable {
 	/**
 	 * Attributs de la classe
 	 */
-	private Blackjack bj;
+	private Main bj;
 	
 	private Stage primaryStage;
 	
@@ -115,15 +114,15 @@ public class GameViewController implements Initializable {
 	/** Récupère des objets importants
 	 * @param pfBj l'objet Blackjack
 	 */
-	public void setBj(Blackjack pfBj) {
+	public void setBj(Main pfBj) {
 		this.bj = pfBj;
 		
 		this.primaryStage = this.bj.getPrimaryStage();
 		this.primaryStage.setOnCloseRequest( e -> {e.consume(); actionQuit();} );
 		
 		this.settings = this.bj.getSettings();
-		RadioMenuItem radio = (RadioMenuItem) this.menuThemes.getItems().get(this.settings[2].getValue());
-		radio.setSelected(true);
+//		RadioMenuItem radio = (RadioMenuItem) this.menuThemes.getItems().get(this.settings[2].getValue());
+//		radio.setSelected(true);
 	}
 	
 	/** Méthode créant une VBox Joueur vide
@@ -135,7 +134,7 @@ public class GameViewController implements Initializable {
 		newPlayerLabel.setMaxWidth(Double.MAX_VALUE);
 		
 		Button newPlayerButton = new Button("Ajouter joueur");
-		newPlayerButton.getStyleClass().add("buttonVertPetit");
+		newPlayerButton.getStyleClass().add("buttonGreenLittle");
 		newPlayerButton.setPrefWidth(125);
 		newPlayerButton.setOnAction( e -> actionMiser(e, indexPlayerVBox, indexPlayerVBox) );
 		
@@ -163,27 +162,11 @@ public class GameViewController implements Initializable {
 	}
 	
 	/**
-	 * Action liée aux RadioMenuItem permettant de charger le thème choisi
+	 * Action liée à un RadioMenuItem permettant d'ouvrir la fenètre des règles
 	 */
 	@FXML
-	private void actionThemes() {
-		RadioMenuItem rad = (RadioMenuItem) this.theme.getSelectedToggle();
-		switch(rad.getText()) {
-			case("Clair"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/bright.css").toExternalForm());
-				this.settings[2].setValue(0);
-				return;
-			case("Sombre"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/dark.css").toExternalForm());
-				this.settings[2].setValue(1);
-				return;
-			case("Bee"):
-				this.primaryStage.getScene().getStylesheets().setAll(Blackjack.class.getResource("resource/flatbee.css").toExternalForm());
-				this.settings[2].setValue(2);
-				return;
-			default:
-				return;
-		}
+	private void actionRules() {
+		Util.showRules(this.primaryStage);
 	}
 	
 	/**
@@ -191,20 +174,7 @@ public class GameViewController implements Initializable {
 	 */
 	@FXML
 	private void actionAbout() {
-		Alert about = new Alert(AlertType.INFORMATION);
-		about.initOwner(this.primaryStage);
-		about.setTitle("À propos de BlackJack");
-		about.setHeaderText("Crédits");
-		
-		WebView webView = new WebView();
-		WebEngine webEngine = webView.getEngine();
-		
-		webView.setPrefSize(550, 300);		
-		webEngine.load(Blackjack.class.getResource("resource/about.html").toString());
-		
-		about.getDialogPane().setContent(webView);
-		
-		about.showAndWait();
+		Util.showAbout(this.primaryStage);
 	}
 	
 	/**
@@ -212,7 +182,7 @@ public class GameViewController implements Initializable {
 	 */
 	@FXML
 	private void actionGoBackToMain() {
-		if (this.indexJoueursTab.size() > 0) {
+		if (isPlaying()) {
 			Alert confirm = new Alert(AlertType.WARNING);
 			confirm.initOwner(this.primaryStage);
 			confirm.setTitle("Retour à l'écran titre");
@@ -233,7 +203,7 @@ public class GameViewController implements Initializable {
 	 */
 	@FXML
 	private void actionQuit() {
-		if (this.indexJoueursTab.size() > 0) {
+		if (isPlaying()) {
 			Alert confirm = new Alert(AlertType.WARNING);
 			confirm.initOwner(this.primaryStage);
 			confirm.setTitle("Fermeture du jeu");
@@ -266,11 +236,11 @@ public class GameViewController implements Initializable {
 				stagePlayer.initModality(Modality.APPLICATION_MODAL);
 				stagePlayer.getIcons().setAll(this.primaryStage.getIcons());
 				
-				FXMLLoader loader = new FXMLLoader(Blackjack.class.getResource("view/ChoixMiseView.fxml"));
+				FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/JoueurView.fxml"));
 			
 				BorderPane borderPane = loader.load();
 				
-				ChoixMiseController ctrl = loader.getController();
+				JoueurViewController ctrl = loader.getController();
 				ctrl.setPrimaryStage(stagePlayer);
 				
 				// Donne les valeurs déjà enregistrées ou non à afficher
@@ -464,7 +434,7 @@ public class GameViewController implements Initializable {
 					
 					Button playerBut = new Button("Modifier mise");
 					playerBut.setPrefWidth(125);
-					playerBut.getStyleClass().add("buttonVertPetit");
+					playerBut.getStyleClass().add("buttonGreenLittle");
 					
 					getPlayerVBox(i).getChildren().add(1, playerBut);
 					getPlayerVBox(i).getChildren().get(2).setVisible(false);
@@ -629,5 +599,18 @@ public class GameViewController implements Initializable {
 		}
 		
 		return cartesJoueur + "\n" + pfMainJoueur.getScore() + " points";
+	}
+	
+	private boolean isPlaying() {
+		int sum = 0;
+		
+		for (int i = 0; i < soldeJoueurs.length; i++) {
+			sum += soldeJoueurs[i];
+		}
+		
+		if (sum > 0)
+			return true;
+		
+		return false;
 	}
 }
