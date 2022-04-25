@@ -288,13 +288,7 @@ public class GameViewController implements Initializable {
 								"Mise : " + this.miseJoueurs[indexPlayerTab]);
 					VBox.setMargin(playerLab, new Insets(71, 0, 0, 0));
 					
-					// Réinitialise l'ArrayList des joueurs (pour qu'ils soit dans l'ordre des indices)
-					this.indexJoueursTab.clear();
-					for (int i = 0; i < 7; i ++) {
-						if (this.miseJoueurs[i] > 0) {
-							this.indexJoueursTab.add(i);
-						}
-					}
+					updateIndexPlayersTab();
 					
 					// Si il y a des joueurs avec des mises on active le bouton de manche et on change le texte de la bulle
 					if (this.indexJoueursTab.size() > 0) {
@@ -304,6 +298,7 @@ public class GameViewController implements Initializable {
 						else
 							this.dealerMessageLab.setText("Vous pouvez lancer une nouvelle manche (" + this.indexJoueursTab.size() + " joueur(s))");
 					} else {
+						this.butStart.setDisable(true);
 						if (this.butStart.getText().equals(this.buttonFirstRound))
 							this.dealerMessageLab.setText("Au moins un joueur doit miser pour lancer une manche");
 						else
@@ -428,7 +423,10 @@ public class GameViewController implements Initializable {
 				for (int i = 0; i < this.indexJoueursTab.size(); i++) {
 					int indexPlayerTab = this.indexJoueursTab.get(i);
 					
-					this.miseJoueurs[indexPlayerTab] = 0;
+					if (this.soldeJoueurs[indexPlayerTab] >= this.settings[1].getValue())
+						this.miseJoueurs[indexPlayerTab] = this.settings[1].getValue();
+					else
+						this.miseJoueurs[indexPlayerTab] = this.soldeJoueurs[indexPlayerTab];
 					VBox.setMargin(getPlayerLabel(i), new Insets(71, 0, 0, 0));
 					
 					Button playerBut = new Button("Modifier mise");
@@ -443,17 +441,16 @@ public class GameViewController implements Initializable {
 					
 					getPlayerLabel(i).setText(
 								this.nomJoueurs[indexPlayerTab] + "\n" +
-								"Portefeuille : " + this.soldeJoueurs[indexPlayerTab] + "\n" +
+								"Portefeuille : " + (this.soldeJoueurs[indexPlayerTab]-this.miseJoueurs[indexPlayerTab]) + "\n" +
 								"Mise : " + this.miseJoueurs[indexPlayerTab]);
 					
 					getPlayerVBox(i).setDisable(false);
 				}
-				this.butStart.setDisable(true);
+				updateIndexPlayersTab();
 				this.butStart.setText(this.buttonNextRound);
-				this.dealerMessageLab.setText("Au moins un joueur doit miser pour lancer une nouvelle manche");
+				this.dealerMessageLab.setText("Vous pouvez lancer une nouvelle manche (" + this.indexJoueursTab.size() + " joueur(s))");
 				this.dealerHandLab.setVisible(false);
 				this.dealerHandTA.setVisible(false);
-				this.indexJoueursTab.clear();
 				bbot.relancerPartie();
 			}
 		}
@@ -611,5 +608,17 @@ public class GameViewController implements Initializable {
 			return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Met à jour l'ArrayList des joueurs
+	 */
+	private void updateIndexPlayersTab() {
+		this.indexJoueursTab.clear();
+		for (int i = 0; i < 7; i ++) {
+			if (this.miseJoueurs[i] > 0) {
+				this.indexJoueursTab.add(i);
+			}
+		}
 	}
 }
