@@ -17,7 +17,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-//import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 /**
@@ -38,9 +37,6 @@ public class SettingsViewController implements Initializable {
 	@FXML
 	private HBox volume;
 
-//	@FXML
-//	private ToggleGroup theme;
-	
 	@FXML
 	private ToggleGroup music;
 	
@@ -48,8 +44,6 @@ public class SettingsViewController implements Initializable {
 	 * Attributs de la classe
 	 */
 	private Main bj;
-	
-//	private Stage primaryStage;
 	
 	private IntegerProperty[] settings;
 	
@@ -65,9 +59,8 @@ public class SettingsViewController implements Initializable {
 	public void setBj(Main pfBj) {
 		this.bj = pfBj;
 		
-//		this.primaryStage = this.bj.getPrimaryStage();
-		
 		this.settings = this.bj.getSettings();
+		
 		// Solde par défaut
 		Slider defaultBalanceSlider = (Slider) this.defaultBalance.getChildren().get(0);
 		Label defaultBalanceLabel = (Label) this.defaultBalance.getChildren().get(1);
@@ -81,10 +74,6 @@ public class SettingsViewController implements Initializable {
 		defaultBetSlider.valueProperty().addListener( (obs, oldval, newval) -> { if (newval.intValue() == 0) defaultBetSlider.valueProperty().setValue(1); } );
 		Bindings.bindBidirectional(defaultBetLabel.textProperty(), this.settings[1], new NumberStringConverter());
 		defaultBetSlider.valueProperty().bindBidirectional(this.settings[1]);
-		
-		// Thème
-//		RadioMenuItem radioTheme = (RadioMenuItem) this.theme.getToggles().get(this.settings[2].getValue());
-//		radioTheme.setSelected(true);
 		
 		// Volume
 		Slider volumeSlider = (Slider) this.volume.getChildren().get(0);

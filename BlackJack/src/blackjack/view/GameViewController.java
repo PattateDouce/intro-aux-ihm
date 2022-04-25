@@ -24,9 +24,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
-import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -45,12 +44,6 @@ public class GameViewController implements Initializable {
 	/**
 	 * Éléments dans le FXML
 	 */
-//	@FXML
-//	private Menu menuThemes;
-	
-//	@FXML
-//	private ToggleGroup theme;
-	
 	@FXML
 	private Label dealerMessageLab;
 	
@@ -71,6 +64,9 @@ public class GameViewController implements Initializable {
 	
 	@FXML
 	private Button butEndSelfTurn;
+	
+	@FXML
+	private MenuBar menuBar;
 	
 	/**
 	 * Attributs de la classe
@@ -109,6 +105,11 @@ public class GameViewController implements Initializable {
 		
 		// Créer le premier plateau de joueur
 		createPlayerVBox(0);
+		
+		// Barre de menus
+		Label lab = new Label("Paramètres");
+		lab.setOnMouseClicked( e -> Util.showSettings(this.primaryStage, this.bj) );
+		menuBar.getMenus().add(0, new Menu("", lab));
 	}
 	
 	/** Récupère des objets importants
@@ -121,8 +122,6 @@ public class GameViewController implements Initializable {
 		this.primaryStage.setOnCloseRequest( e -> {e.consume(); actionQuit();} );
 		
 		this.settings = this.bj.getSettings();
-//		RadioMenuItem radio = (RadioMenuItem) this.menuThemes.getItems().get(this.settings[2].getValue());
-//		radio.setSelected(true);
 	}
 	
 	/** Méthode créant une VBox Joueur vide

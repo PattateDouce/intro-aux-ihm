@@ -35,7 +35,7 @@
       </ButtonBar>
    </bottom>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
         <menus>
             <Menu mnemonicParsing="false" text="Aide">
               <items>
