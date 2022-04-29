@@ -1,38 +1,59 @@
 package blackjack.view;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import blackjack.Main;
-import blackjack.util.Util;
+import blackjack.Util;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
 /**
+ * Classe contrôleur qui gère la fenêtre d'écran titre
  * @author Guibert Rémy
- * Classe contrôleur qui gère la fenètre d'écran titre
  */
 public class MainViewController implements Initializable {
 
 	/**
 	 * Attributs de la classe
 	 */
-	private Main bj;
+	private Main main;
 	
 	private Stage primaryStage;
 	
+	private DoubleProperty[] offsets;
+	
+	private IntegerProperty[] settings;
+	
+	private Locale locale;
+	
+	private ObjectProperty<MediaPlayer> mediaPlayer;
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		this.locale = resources.getLocale();
 	}
 
-	/** Révupère l'instance du programme principal pour plus tard pouvoir changer de scène
-	 * @param pfBj l'objet Blackjack
+	/** Récupère l'instance du programme principal pour initialiser les objets
+	 * @param main L'objet Main
 	 */
-	public void setBj(Main pfBj) {
-		this.bj = pfBj;
+	public void initializeObjects(Main main) {
+		this.main = main;
 		
-		this.primaryStage = this.bj.getPrimaryStage();
+		this.primaryStage = this.main.getPrimaryStage();
+		this.primaryStage.setOnCloseRequest( e -> {e.consume(); actionQuit();} );
+		
+		this.offsets = this.main.getOffsets();
+		
+		this.settings = this.main.getSettings();
+		
+		this.mediaPlayer = this.main.getMediaPlayer();
 	}
 	
 	/**
@@ -40,15 +61,15 @@ public class MainViewController implements Initializable {
 	 */
 	@FXML
 	private void actionRules() {
-		Util.showRules(this.primaryStage);
+		Util.dialog(this.primaryStage, this.locale, "rules.title", "rules.html");
 	}
 	
 	/**
-	 * Ouvre une nouvelle fenètre avec les crédits
+	 * Ouvre une nouvelle fenêtre avec les crédits
 	 */
 	@FXML
 	private void actionAbout() {
-		Util.showAbout(this.primaryStage);
+		Util.dialog(this.primaryStage, this.locale, "about.title", "about.html");
 	}
 	
 	/**
@@ -56,7 +77,19 @@ public class MainViewController implements Initializable {
 	 */
 	@FXML
 	private void actionStart() {
-		this.bj.loadGameView();
+		this.mediaPlayer.getValue().stop();
+		String audio;
+		if (this.settings[2].getValue() == 0) {
+			audio = "SM64DS Luigi's Casino Theme.m4a";
+			
+		} else if (this.settings[2].getValue() == 1) {
+			audio = "SM64DS Luigi's Casino Theme Slowed & Reverb.m4a";
+			
+		} else {
+			audio = "SM64DS Luigi's Casino Theme Jazz Remix.m4a";
+		}
+		Util.loadMusic(this.mediaPlayer, audio, this.settings[3].getValue());
+		Util.loadMainOrGameView(this.main, primaryStage, this.locale, this.offsets, "Game");
 	}
 	
 	/**
@@ -64,7 +97,7 @@ public class MainViewController implements Initializable {
 	 */
 	@FXML
 	private void actionSettings() {
-		this.bj.loadSettingsView();
+		Util.loadSettingsView(this.main, this.primaryStage, this.locale, this.offsets, false);
 	}
 	
 	/**

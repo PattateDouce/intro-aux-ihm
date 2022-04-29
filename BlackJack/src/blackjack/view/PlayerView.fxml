@@ -11,16 +11,16 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane styleClass="joueurview" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="blackjack.view.JoueurViewController">
+<BorderPane styleClass="joueurview" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="blackjack.view.PlayerViewController">
    <center>
       <VBox fx:id="content" prefHeight="217.0" prefWidth="320.0" BorderPane.alignment="CENTER">
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" text="Nom du joueur">
+            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" text="%playername">
                <font>
                   <Font name="System Bold" size="20.0" />
                </font>
             </Label>
-            <TextField fx:id="nomJoueurTextField" alignment="CENTER" prefHeight="40.0" text="Joueur X">
+            <TextField fx:id="playerName" alignment="CENTER" prefHeight="40.0" text="Player X">
                <font>
                   <Font size="16.0" />
                </font>
@@ -28,12 +28,12 @@
                   <Insets bottom="1.0" left="5.0" right="5.0" />
                </VBox.margin>
             </TextField>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="350.0" text="Montant du portefeuille">
+            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="350.0" text="%wallet.label">
                <font>
                   <Font name="System Bold" size="20.0" />
                </font>
             </Label>
-            <Label fx:id="portefeuilleLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" styleClass="value" text="Solde here">
+            <Label fx:id="walletLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" styleClass="value" text="Balance here">
                <font>
                   <Font size="18.0" />
                </font>
@@ -41,7 +41,7 @@
                   <Insets top="1.0" />
                </VBox.margin>
             </Label>
-            <Slider fx:id="portefeuilleSlider" max="10000.0" min="1.0">
+            <Slider fx:id="walletSlider" max="10000.0" min="1.0">
                <cursor>
                   <Cursor fx:constant="H_RESIZE" />
                </cursor>
@@ -49,12 +49,12 @@
                   <Insets left="5.0" right="5.0" />
                </VBox.margin>
             </Slider>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="350.0" text="Montant de la mise">
+            <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="350.0" text="%bet.label">
                <font>
                   <Font name="System Bold" size="20.0" />
                </font>
             </Label>
-            <Label fx:id="miseLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" styleClass="value" text="Bet here">
+            <Label fx:id="betLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0" prefWidth="350.0" styleClass="value" text="Bet here">
                <font>
                   <Font size="18.0" />
                </font>
@@ -62,7 +62,7 @@
                   <Insets top="1.0" />
                </VBox.margin>
             </Label>
-            <Slider fx:id="miseSlider">
+            <Slider fx:id="betSlider">
                <cursor>
                   <Cursor fx:constant="H_RESIZE" />
                </cursor>
@@ -76,8 +76,8 @@
    <bottom>
       <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <buttons>
-          <Button mnemonicParsing="false" onAction="#actionValidate" styleClass="buttondefault" text="Valider" />
-            <Button mnemonicParsing="false" onAction="#actionCancel" styleClass="buttoncancel" text="Annuler" />
+          <Button mnemonicParsing="false" onAction="#actionValidate" styleClass="buttondefault" text="%validate" />
+            <Button mnemonicParsing="false" onAction="#actionCancel" styleClass="buttoncancel" text="%cancel" />
         </buttons>
          <BorderPane.margin>
             <Insets right="5.0" />

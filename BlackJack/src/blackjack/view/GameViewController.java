@@ -4,16 +4,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import blackjack.Main;
+import blackjack.Util;
 import blackjack.om.BlackBot;
 import blackjack.om.Carte;
 import blackjack.om.EtatBlackBot;
 import blackjack.om.MainBlackjack;
-import blackjack.util.Util;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,12 +35,13 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
+ * Classe contrôleur qui gère la fenêtre d'écran de jeu
  * @author Guibert Rémy
- * Classe contrôleur qui gère la fenètre d'écran de jeu
  */
 public class GameViewController implements Initializable {
 	
@@ -60,10 +64,10 @@ public class GameViewController implements Initializable {
 	private Button butStart;
 	
 	@FXML
-	private Button butGetSelfCard;
+	private Button butDrawCard;
 	
 	@FXML
-	private Button butEndSelfTurn;
+	private Button butEndTurn;
 	
 	@FXML
 	private MenuBar menuBar;
@@ -71,101 +75,128 @@ public class GameViewController implements Initializable {
 	/**
 	 * Attributs de la classe
 	 */
-	private Main bj;
+	private Main main;
 	
 	private Stage primaryStage;
 	
+	private DoubleProperty[] offsets;
+	
 	private IntegerProperty[] settings;
 	
-	private BlackBot bbot;
+	private ObjectProperty<Locale> locale;
 	
-	private final String buttonFirstRound = "Lancer manche";
+	private ResourceBundle resources;
 	
-	private final String buttonNextRound = "Nouvelle manche";
+	private ObjectProperty<MediaPlayer> mediaPlayer;
 	
-	private String[] nomJoueurs;
+	private final String[] cardsName = new String[13];
 	
-	private int[] soldeJoueurs;
+	private final String[] colorsName = new String[4];
 	
-	private int[] miseJoueurs;
+	private final String[] colorsSymbols = {"♠ ", "♥ ", "♣ ", "♦ "};
+	
+	private String[] playersName;
+	
+	private int[] playersWallet;
+	
+	private int[] playersBet;
+	
+	private ArrayList<Integer> playersIndexTab;
+	
+	private BlackBot blackbot;
 	
 	private int currentPlayer;
 	
-	private ArrayList<Integer> indexJoueursTab;
+	private boolean firstRound = true;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// Initialise les attributs
-		this.bbot = new BlackBot(7);
-		this.nomJoueurs = new String[7];
-		this.soldeJoueurs = new int[7];
-		this.miseJoueurs = new int[7];
+		this.resources = resources;
+		this.playersName = new String[7];
+		this.playersWallet = new int[7];
+		this.playersBet = new int[7];
+		this.playersIndexTab = new ArrayList<Integer>();
+		this.blackbot = new BlackBot(7);
 		this.currentPlayer = 0;
-		this.indexJoueursTab = new ArrayList<Integer>();
+		
+		// Initialise le nom de cartes et leurs couleurs
+		for (int i = 0; i < 13; i++)
+			this.cardsName[i] = resources.getString("card." + (i+1));
+		for (int i = 0; i < 4; i++)
+			this.colorsName[i] = resources.getString("card.color." + (i+1));
 		
 		// Créer le premier plateau de joueur
 		createPlayerVBox(0);
 		
 		// Barre de menus
-		Label lab = new Label("Paramètres");
-		lab.setOnMouseClicked( e -> Util.showSettings(this.primaryStage, this.bj) );
+		Label lab = new Label(resources.getString("settings"));
+		lab.setOnMouseClicked( e -> Util.loadSettingsView(this.main, this.primaryStage, this.locale.getValue(), this.offsets, true) );
 		menuBar.getMenus().add(0, new Menu("", lab));
 	}
 	
-	/** Récupère des objets importants
-	 * @param pfBj l'objet Blackjack
+	/** Récupère l'instance du programme principal pour initialiser les objets
+	 * @param main L'objet Main
 	 */
-	public void setBj(Main pfBj) {
-		this.bj = pfBj;
+	public void initializeObjects(Main main) {
+		this.main = main;
 		
-		this.primaryStage = this.bj.getPrimaryStage();
+		this.primaryStage = this.main.getPrimaryStage();
 		this.primaryStage.setOnCloseRequest( e -> {e.consume(); actionQuit();} );
 		
-		this.settings = this.bj.getSettings();
+		this.offsets = this.main.getOffsets();
+		
+		this.settings = this.main.getSettings();
+		
+		this.locale = this.main.getLocale();
+		
+		this.mediaPlayer = this.main.getMediaPlayer();
 	}
 	
 	/** Méthode créant une VBox Joueur vide
 	 * @param indexPlayerVBox Indice de la VBox à créer
 	 */
 	private void createPlayerVBox(int indexPlayerVBox) {
-		Label newPlayerLabel = new Label();
-		newPlayerLabel.setMinHeight(60);
-		newPlayerLabel.setMaxWidth(Double.MAX_VALUE);
+		Label newPlayerLab = new Label();
+		newPlayerLab.setMinHeight(60);
+		newPlayerLab.setMaxWidth(Double.MAX_VALUE);
 		
-		Button newPlayerButton = new Button("Ajouter joueur");
-		newPlayerButton.getStyleClass().add("buttonGreenLittle");
-		newPlayerButton.setPrefWidth(125);
-		newPlayerButton.setOnAction( e -> actionMiser(e, indexPlayerVBox, indexPlayerVBox) );
+		Button newPlayerBut = new Button(this.resources.getString("button.create"));
+		newPlayerBut.getStyleClass().add("buttonGreenLittle");
+		newPlayerBut.setPrefWidth(125);
+		newPlayerBut.setOnAction( e -> actionMiser(e, indexPlayerVBox, indexPlayerVBox) );
 		
-		TextArea newPlayerTextArea = new TextArea();
-		newPlayerTextArea.setVisible(false);
-		newPlayerTextArea.setEditable(false);
-		newPlayerTextArea.setWrapText(true);
+		TextArea newPlayerTA = new TextArea();
+		newPlayerTA.setVisible(false);
+		newPlayerTA.setEditable(false);
+		newPlayerTA.setWrapText(true);
 		
-		VBox newPlayerVBox = new VBox(newPlayerLabel, newPlayerButton, newPlayerTextArea);
+		VBox newPlayerVBox = new VBox(newPlayerLab, newPlayerBut, newPlayerTA);
 		newPlayerVBox.getStyleClass().add("playerVBox");
 		newPlayerVBox.setMinWidth(134);
 		newPlayerVBox.setMaxWidth(160);
 
-		VBox.setMargin(newPlayerLabel, new Insets(45, 0, 0, 0));
-		VBox.setMargin(newPlayerTextArea, new Insets(3));
+		VBox.setMargin(newPlayerLab, new Insets(45, 0, 0, 0));
+		VBox.setMargin(newPlayerTA, new Insets(3));
 		
 		this.playersHBox.getChildren().add(newPlayerVBox);
 		
+		int left = 2;
+		int right = 0;
 		if (indexPlayerVBox == 0) // La plus à gauche à une marge à gauche de 4px
-			HBox.setMargin(getPlayerVBox(indexPlayerVBox), new Insets(0, 0, 0, 4));
+			left = 4;
 		else if (indexPlayerVBox == 6) // La plus à droite à une marge à droite de 4px
-			HBox.setMargin(getPlayerVBox(indexPlayerVBox), new Insets(0, 4, 0, 2));
-		else
-			HBox.setMargin(getPlayerVBox(indexPlayerVBox), new Insets(0, 0, 0, 2));
+			right = 4;
+		
+		HBox.setMargin(getPlayerVBox(indexPlayerVBox), new Insets(0, right, 0, left));
 	}
 	
 	/**
-	 * Action liée à un RadioMenuItem permettant d'ouvrir la fenètre des règles
+	 * Ouvre une nouvelle fenètre avec les règles
 	 */
 	@FXML
 	private void actionRules() {
-		Util.showRules(this.primaryStage);
+		Util.dialog(this.primaryStage, this.locale.getValue(), "rules.title", "rules.html");
 	}
 	
 	/**
@@ -173,59 +204,43 @@ public class GameViewController implements Initializable {
 	 */
 	@FXML
 	private void actionAbout() {
-		Util.showAbout(this.primaryStage);
+		Util.dialog(this.primaryStage, this.locale.getValue(), "about.title", "about.html");
 	}
 	
 	/**
-	 * Revient à l'écran d'accueil, sauf si un joueur a misé.
+	 * Revient à l'écran d'accueil, sauf si un joueur existe
 	 */
 	@FXML
-	private void actionGoBackToMain() {
+	private void actionBack() {
 		if (isPlaying()) {
-			Alert confirm = new Alert(AlertType.WARNING);
-			confirm.initOwner(this.primaryStage);
-			confirm.setTitle("Retour à l'écran titre");
-			confirm.setHeaderText("Toute progression sera perdu");
-			confirm.setContentText("Voulez-vous vraiment revenir à l'écran titre ?");
-			confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-			
-			Optional<ButtonType> choix = confirm.showAndWait();
-	
-			if (choix.get().equals(ButtonType.YES))
-				this.bj.loadMainView();
-		} else
-			this.bj.loadMainView();
+			if (!Util.dialogConfirm(this.primaryStage, this.locale.getValue(), "back"))
+				return;
+		}
+		this.mediaPlayer.getValue().stop();
+		Util.loadMusic(this.mediaPlayer, "Memoir of Summer - David Luong.m4a", this.settings[3].getValue());
+		Util.loadMainOrGameView(this.main, primaryStage, this.locale.getValue(), this.offsets, "Main");
 	}
 	
 	/**
-	 * Quitte le jeu, sauf si un joueur a misé.
+	 * Quitte le jeu, sauf si un joueur existe
 	 */
 	@FXML
 	private void actionQuit() {
 		if (isPlaying()) {
-			Alert confirm = new Alert(AlertType.WARNING);
-			confirm.initOwner(this.primaryStage);
-			confirm.setTitle("Fermeture du jeu");
-			confirm.setHeaderText("Toute progression sera perdu");
-			confirm.setContentText("Voulez-vous vraiment quitter ?");
-			confirm.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-			
-			Optional<ButtonType> choix = confirm.showAndWait();
-	
-			if (choix.get().equals(ButtonType.YES))
-				this.primaryStage.close();
-		} else
-			this.primaryStage.close();
+			if (!Util.dialogConfirm(this.primaryStage, this.locale.getValue(), "quit"))
+				return;
+		}
+		this.primaryStage.close();
 	}
 	
 	/** Appellé par les boutons de création ou de modification de joueur
-	 * Permet de créer ou modifier un joueur, ou seulement sa mise si une partie à été lancée
+	 * Permet de créer ou modifier un joueur, ou seulement sa mise si une partie à était lancée
 	 * @param event L'évènement déclancheur, permet de modifier le texte du bouton 
-	 * @param indexPlayerTab Indice dans les tableau d'informations des joueurs
-	 * @param indexPlayerVBox Indice dans la liste de VBox
+	 * @param playerIndexTab Indice dans les tableaux d'informations des joueurs
+	 * @param playerIndexVBox Indice dans la liste de VBox
 	 */
-	private void actionMiser(ActionEvent event, int indexPlayerTab, int indexPlayerVBox) {
-		if (this.butStart.getText().equals(this.buttonFirstRound) || this.soldeJoueurs[indexPlayerTab] != 0) {
+	private void actionMiser(ActionEvent event, int playerIndexTab, int playerIndexVBox) {
+		if (firstRound || this.playersWallet[playerIndexTab] != 0) {
 			try {
 				Button playerBut = (Button) event.getSource();
 				
@@ -234,29 +249,33 @@ public class GameViewController implements Initializable {
 				stagePlayer.initOwner(this.primaryStage);
 				stagePlayer.initModality(Modality.APPLICATION_MODAL);
 				stagePlayer.getIcons().setAll(this.primaryStage.getIcons());
+				stagePlayer.setX(primaryStage.getX() + (primaryStage.getWidth() - (320 + offsets[0].getValue())) / 2);
+				stagePlayer.setY(primaryStage.getY() + (primaryStage.getHeight() - (257 + offsets[1].getValue())) / 2);
 				
-				FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/JoueurView.fxml"));
+				FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/PlayerView.fxml"));
+				loader.setResources(this.resources);
 			
 				BorderPane borderPane = loader.load();
 				
-				JoueurViewController ctrl = loader.getController();
-				ctrl.setPrimaryStage(stagePlayer);
+				PlayerViewController ctrl = loader.getController();
+				ctrl.setWindowStage(stagePlayer);
 				
 				// Donne les valeurs déjà enregistrées ou non à afficher
-				if (this.nomJoueurs[indexPlayerTab]== null) {
-					ctrl.setDefaultValues("Joueur " + (indexPlayerTab+1), this.settings[0].getValue(), this.settings[1].getValue());
-					stagePlayer.setTitle("Création d'un joueur");
-				} else if (this.butStart.getText().equals(this.buttonNextRound) && this.miseJoueurs[indexPlayerTab] == 0) {
-					ctrl.setDefaultValues(this.nomJoueurs[indexPlayerTab], this.soldeJoueurs[indexPlayerTab], this.settings[1].getValue());
+				if (this.playersName[playerIndexTab] == null) {
+					ctrl.setDefaultValues(this.resources.getString("player") + (playerIndexTab+1), this.settings[0].getValue(), this.settings[1].getValue());
+					stagePlayer.setTitle(this.resources.getString("title.creating"));
 				} else {
-					ctrl.setDefaultValues(this.nomJoueurs[indexPlayerTab], this.soldeJoueurs[indexPlayerTab], this.miseJoueurs[indexPlayerTab]);
-					stagePlayer.setTitle("Modification de " + this.nomJoueurs[indexPlayerTab]);
+					if (this.playersBet[playerIndexTab] == 0)
+						ctrl.setDefaultValues(this.playersName[playerIndexTab], this.playersWallet[playerIndexTab], this.settings[1].getValue());
+					else
+						ctrl.setDefaultValues(this.playersName[playerIndexTab], this.playersWallet[playerIndexTab], this.playersBet[playerIndexTab]);
+					stagePlayer.setTitle(this.resources.getString("title.modifying") + this.playersName[playerIndexTab]);
 				}
 				
-				// Si la phase de création de joueur ets passer alors on ne peut plus changer que la mise
-				if (this.butStart.getText().equals(this.buttonNextRound)) {
+				// Si la phase de création de joueur est passer alors on ne peut plus changer que la mise
+				if (!firstRound) {
 					ctrl.modeMise();
-					stagePlayer.setTitle("Choix de la mise de " + this.nomJoueurs[indexPlayerTab]);
+					stagePlayer.setTitle(this.resources.getString("title.changebet") + this.playersName[playerIndexTab]);
 				}
 				
 				Scene scene = new Scene(borderPane);
@@ -270,63 +289,51 @@ public class GameViewController implements Initializable {
 					
 					// Enregistre les données entrées
 					if (ctrl.getNom().trim().equals(""))
-						this.nomJoueurs[indexPlayerTab] = "Joueur " + (indexPlayerTab+1);
+						this.playersName[playerIndexTab] = this.resources.getString("player") + (playerIndexTab+1);
 					else
-						this.nomJoueurs[indexPlayerTab] = ctrl.getNom().trim();
-					this.soldeJoueurs[indexPlayerTab] = ctrl.getPortefeuille();
-					this.miseJoueurs[indexPlayerTab] = ctrl.getMise();
+						this.playersName[playerIndexTab] = ctrl.getNom().trim();
+					this.playersWallet[playerIndexTab] = ctrl.getPortefeuille();
+					this.playersBet[playerIndexTab] = ctrl.getMise();
 					
 					// On met à jour les infos du joueur
-					Label playerLab;
-					if (this.butStart.getText().equals(this.buttonFirstRound))
-						playerLab = getPlayerLabel(indexPlayerTab);
-					else
-						playerLab = getPlayerLabel(indexPlayerVBox);
+					Label playerLab = getPlayerLabel(playerIndexVBox);
 					playerLab.setText(
-								this.nomJoueurs[indexPlayerTab] + "\n" +
-								"Portefeuille : " + (this.soldeJoueurs[indexPlayerTab]-this.miseJoueurs[indexPlayerTab]) + "\n" +
-								"Mise : " + this.miseJoueurs[indexPlayerTab]);
+							this.playersName[playerIndexTab] + "\n" +
+							this.resources.getString("wallet") + " : " + (this.playersWallet[playerIndexTab]-this.playersBet[playerIndexTab]) + "\n" +
+							this.resources.getString("bet") + " : " + this.playersBet[playerIndexTab]);
 					VBox.setMargin(playerLab, new Insets(71, 0, 0, 0));
 					
-					updateIndexPlayersTab();
+					updatePlayersIndexTab();
 					
-					// Si il y a des joueurs avec des mises on active le bouton de manche et on change le texte de la bulle
-					if (this.indexJoueursTab.size() > 0) {
+					if (this.playersIndexTab.size() > 0) {
 						this.butStart.setDisable(false);
-						if (this.butStart.getText().equals(this.buttonFirstRound))
-							this.dealerMessageLab.setText("Vous pouvez lancer une manche (" + this.indexJoueursTab.size() + " joueur(s))");
-						else
-							this.dealerMessageLab.setText("Vous pouvez lancer une nouvelle manche (" + this.indexJoueursTab.size() + " joueur(s))");
+						this.dealerMessageLab.setText(this.resources.getString("message.before") + "\n(" + this.playersIndexTab.size() + " " + this.resources.getString("message.players") + ")");
 					} else {
 						this.butStart.setDisable(true);
-						if (this.butStart.getText().equals(this.buttonFirstRound))
-							this.dealerMessageLab.setText("Au moins un joueur doit miser pour lancer une manche");
-						else
-							this.dealerMessageLab.setText("Au moins un joueur doit miser pour lancer une nouvelle manche");
+						this.dealerMessageLab.setText(this.resources.getString("message.default"));
 					}
 					
-					if (this.butStart.getText().equals(this.buttonFirstRound)) {
-						playerBut.setText("Modifier");
+					if (firstRound) {
+						playerBut.setText(this.resources.getString("button.edit"));
 					}
 						
-					// Si on a cliquer sur le dernier plateau de la liste et qu'il
-					// n'y a pas déjà 7 plateaux, alors on en crée un nouveau
+					// Si on a cliqué sur le dernier plateau de la liste et qu'il n'y a pas déjà 7 plateaux
+					// et qu'on n'a pas encore lancer la première manche, alors on créer un nouveau plateau
 					int nbVBox = this.playersHBox.getChildren().size();
-					if (indexPlayerTab == nbVBox-1 && nbVBox < 7 && this.butStart.getText().equals(this.buttonFirstRound)) {
-						createPlayerVBox(indexPlayerTab+1);
+					if (playerIndexTab == nbVBox-1 && nbVBox < 7 && firstRound) {
+						createPlayerVBox(playerIndexTab+1);
 					}
 				}
 			} catch (IOException e) {
-				System.out.println("Ressource ChoixMiseView.fxml non disponible");
-				e.printStackTrace();
+				System.out.println("Problem(s) with PlayerView.fxml");
 				System.exit(1);
 			}
 		} else {
 			Alert dialog = new Alert(AlertType.INFORMATION);
 			dialog.initOwner(this.primaryStage);
-			dialog.setTitle("Portefeuille vide");
-			dialog.setHeaderText(this.nomJoueurs[indexPlayerTab] + " n'a plus d'argent, il ne peut plus miser.");
-			dialog.setContentText("Il sera retiré des joueurs au démarrage de la prochaine manche.");
+			dialog.setTitle(this.resources.getString("emptywallet.title"));
+			dialog.setHeaderText(this.playersName[playerIndexTab] + " " + this.resources.getString("emptywallet.header"));
+			dialog.setContentText(this.resources.getString("emptywallet.content"));
 			dialog.showAndWait();
 		}
 	}
@@ -336,30 +343,30 @@ public class GameViewController implements Initializable {
 	 */
 	@FXML
 	private void actionStart() {
-		if (this.bbot.getEtat() == EtatBlackBot.MISE) { // Lançage de partie
+		if (this.blackbot.getEtat() == EtatBlackBot.MISE) {
 			
-			// Mise et met à jour le solde
-			for (int i = 0; i < this.indexJoueursTab.size(); i++) {
-				int indexPlayerTab = this.indexJoueursTab.get(i);
-				int tempMise = this.miseJoueurs[indexPlayerTab];
-				bbot.miser(indexPlayerTab, tempMise);
-				this.soldeJoueurs[indexPlayerTab] -= tempMise;
+			// Fait miser les joueurs et met à jour leurs soldes
+			for (int i = 0; i < this.playersIndexTab.size(); i++) {
+				int indexPlayerTab = this.playersIndexTab.get(i);
+				int mise = this.playersBet[indexPlayerTab];
+				blackbot.miser(indexPlayerTab, mise);
+				this.playersWallet[indexPlayerTab] -= mise;
 			}
 			
-			this.bbot.distribuer();
+			this.blackbot.distribuer();
 			
 			this.butStart.setDisable(true);
-			this.butGetSelfCard.setDisable(false);
-			this.butEndSelfTurn.setDisable(false);
+			this.butDrawCard.setDisable(false);
+			this.butEndTurn.setDisable(false);
 			this.dealerHandLab.setVisible(true);
-			this.dealerHandTA.setVisible(true);
+			this.dealerHandTA.setText(handCards(blackbot.getMainBanque()));
 			this.dealerHandTA.setDisable(false);
-			this.dealerHandTA.setText(cartesMain(bbot.getMainBanque()));
+			this.dealerHandTA.setVisible(true);
 			
 			// Détermine la première VBox contenant un joueur
 			int indexPrem = 0;
 			for (int i = 0; i < 7; i++) {
-				if (nomJoueurs[i] != null) {
+				if (playersName[i] != null) {
 					indexPrem = i;
 					i += 7; // met fin à la boucle
 				}
@@ -367,18 +374,19 @@ public class GameViewController implements Initializable {
 			
 			// Supprime les VBox qui n'ont pas de mise
 			int indexDel = 0;
-			for (int i  = indexPrem; this.playersHBox.getChildren().size() != this.indexJoueursTab.size(); i ++) {
-				if (!this.indexJoueursTab.contains(i)) {
-					this.soldeJoueurs[i] = 0; // pour savoir quand il n'y a plus personne qui peut jouer
-					this.nomJoueurs[i] = null;
+			for (int i  = indexPrem; this.playersHBox.getChildren().size() != this.playersIndexTab.size(); i ++) {
+				if (!this.playersIndexTab.contains(i)) {
+					// Pour savoir quand il n'y a plus personne qui peut jouer
+					this.playersWallet[i] = 0;
+					this.playersName[i] = null;
 					playersHBox.getChildren().remove(indexDel);
 				} else {
 					indexDel ++;
 				}
 			}
 			
-			for (int i = 0; i < this.indexJoueursTab.size(); i++) {
-				// Met à jour les plateaux des joueurs (contenu)
+			for (int i = 0; i < this.playersIndexTab.size(); i++) {
+				// Supprime le bouton
 				getPlayerVBox(i).getChildren().remove(1);
 				
 				// Met à jour les plateaux des joueurs (position et affichage)
@@ -386,105 +394,104 @@ public class GameViewController implements Initializable {
 				getPlayerTextArea(i).setVisible(true);
 				
 				// Affiche les cartes des joueurs
-				getPlayerTextArea(i).setText(cartesMain(bbot.getMainJoueurs(this.indexJoueursTab.get(i))));
+				getPlayerTextArea(i).setText(handCards(blackbot.getMainJoueurs(this.playersIndexTab.get(i))));
 			}
 			
-			this.dealerMessageLab.setText(this.nomJoueurs[this.indexJoueursTab.get(0)] + " à toi de jouer");
+			this.dealerMessageLab.setText(this.playersName[this.playersIndexTab.get(0)] + " " + this.resources.getString("message.turn"));
 			
 			// Met en avant le joueur qui doit jouer
 			getPlayerVBox(0).getStyleClass().add("currentplayer");
 			
+			this.firstRound = false;
+			
 		} else { // Récupération des gains
 			
-			int tempSom = 0;
-			for (int i = 0; i < soldeJoueurs.length; i++) {
-				tempSom += soldeJoueurs[i];
+			int sum = 0;
+			for (int i = 0; i < 7; i++) {
+				sum += playersWallet[i];
 			}
 			
-			if (tempSom == 0) { // Si plus aucun joueur ne peut jouer
-				Alert gameFinished = new Alert(AlertType.CONFIRMATION);
-				gameFinished.initOwner(this.primaryStage);
-				gameFinished.setTitle("Fin de partie");
-				gameFinished.setHeaderText("Plus aucun joueur n'est en capacité de jouer");
-				gameFinished.setContentText("Voulez vous réinitialiser le plateau ?");
+			if (sum == 0) { // Si plus aucun joueur ne peut jouer
+				Alert gameOver = new Alert(AlertType.CONFIRMATION);
+				gameOver.initOwner(this.primaryStage);
+				gameOver.setTitle(this.resources.getString("endgame.title"));
+				gameOver.setHeaderText(this.resources.getString("endgame.header"));
+				gameOver.setContentText(this.resources.getString("endgame.content"));
 				
-				ButtonType butClose = new ButtonType("Fermer le jeu", ButtonData.CANCEL_CLOSE);
+				ButtonType butClose = new ButtonType(this.resources.getString("endgame.button.close"), ButtonData.CANCEL_CLOSE);
+				ButtonType butYes = new ButtonType(this.resources.getString("yes"), ButtonData.YES);
 				
-				gameFinished.getButtonTypes().set(0, ButtonType.YES);
-				gameFinished.getButtonTypes().set(1, butClose);
+				gameOver.getButtonTypes().set(0, butYes);
+				gameOver.getButtonTypes().set(1, butClose);
 				
-				Optional<ButtonType> choix = gameFinished.showAndWait();
+				Optional<ButtonType> choix = gameOver.showAndWait();
 				
-				if (choix.get().equals(ButtonType.YES))
-					this.bj.loadGameView();
+				if (choix.get().equals(butYes))
+					Util.loadMainOrGameView(this.main, primaryStage, this.locale.getValue(), this.offsets, "Game");
 				else
 					this.primaryStage.close();
 			} else {
-				for (int i = 0; i < this.indexJoueursTab.size(); i++) {
-					int indexPlayerTab = this.indexJoueursTab.get(i);
+				for (int i = 0; i < this.playersIndexTab.size(); i++) {
+					int indexPlayerTab = this.playersIndexTab.get(i);
 					
-					if (this.soldeJoueurs[indexPlayerTab] >= this.settings[1].getValue())
-						this.miseJoueurs[indexPlayerTab] = this.settings[1].getValue();
+					if (this.playersWallet[indexPlayerTab] > this.settings[1].getValue())
+						this.playersBet[indexPlayerTab] = this.settings[1].getValue();
 					else
-						this.miseJoueurs[indexPlayerTab] = this.soldeJoueurs[indexPlayerTab];
+						this.playersBet[indexPlayerTab] = this.playersWallet[indexPlayerTab];
 					VBox.setMargin(getPlayerLabel(i), new Insets(71, 0, 0, 0));
 					
-					Button playerBut = new Button("Modifier mise");
+					Button playerBut = new Button(this.resources.getString("button.changebet"));
 					playerBut.setPrefWidth(125);
 					playerBut.getStyleClass().add("buttonGreenLittle");
+					int ind = i;
+					playerBut.setOnAction( e -> actionMiser(e, indexPlayerTab, ind) );
 					
 					getPlayerVBox(i).getChildren().add(1, playerBut);
 					getPlayerVBox(i).getChildren().get(2).setVisible(false);
 					
-					int ind = i;
-					playerBut.setOnAction( e -> actionMiser(e, indexPlayerTab, ind) );
-					
 					getPlayerLabel(i).setText(
-								this.nomJoueurs[indexPlayerTab] + "\n" +
-								"Portefeuille : " + (this.soldeJoueurs[indexPlayerTab]-this.miseJoueurs[indexPlayerTab]) + "\n" +
-								"Mise : " + this.miseJoueurs[indexPlayerTab]);
+								this.playersName[indexPlayerTab] + "\n" +
+								this.resources.getString("wallet") + " : " + (this.playersWallet[indexPlayerTab]-this.playersBet[indexPlayerTab]) + "\n" +
+								this.resources.getString("bet") + " : " + this.playersBet[indexPlayerTab]);
 					
 					getPlayerVBox(i).setDisable(false);
 				}
-				updateIndexPlayersTab();
-				this.butStart.setText(this.buttonNextRound);
-				this.dealerMessageLab.setText("Vous pouvez lancer une nouvelle manche (" + this.indexJoueursTab.size() + " joueur(s))");
+				updatePlayersIndexTab();
+				this.butStart.setText(this.resources.getString("button.next"));
+				this.dealerMessageLab.setText(this.resources.getString("message.before") + "\n(" + this.playersIndexTab.size() + " " +this.resources.getString("message.players") + ")");
 				this.dealerHandLab.setVisible(false);
 				this.dealerHandTA.setVisible(false);
-				bbot.relancerPartie();
+				blackbot.relancerPartie();
 			}
 		}
 	}
 	
 	/**
-	 * Lié au bouton de demande de carte.
-	 * Fait tirer un carte au joueur actuel et met à jour sa main.
+	 * Fait tirer un carte au joueur qui joue et met à jour sa main.
 	 * Si le joueur perd alors on passe au joueur suivant si il y en a, sinon, le croupier joue.
 	 */
 	@FXML
 	private void actionDrawACard() {
-		int indexPlayerTab = this.indexJoueursTab.get(this.currentPlayer);
+		int indexPlayerTab = this.playersIndexTab.get(this.currentPlayer);
 		
-		this.bbot.tirer(indexPlayerTab);
-		getPlayerTextArea(this.currentPlayer).setText(cartesMain(bbot.getMainJoueurs(indexPlayerTab)));
+		this.blackbot.tirer(indexPlayerTab);
+		getPlayerTextArea(this.currentPlayer).setText(handCards(blackbot.getMainJoueurs(indexPlayerTab)));
 		
-		if (this.bbot.getFinJoueurs(indexPlayerTab)) {
-			// Retire la mise en avant
+		// Si le joueur brûle on retire la mise en avant et désactive son TextArea
+		if (this.blackbot.getFinJoueurs(indexPlayerTab)) {
 			getPlayerVBox(this.currentPlayer).getStyleClass().remove("currentplayer");
-			// Si le jouer dépasse 21 alors son TextArea est désactivé
 			getPlayerVBox(this.currentPlayer).setDisable(true);
 			checkFin();
 		}
 	}
 	
 	/**
-	 * Lié au bouton de fin de tour.
-	 * Met fait au tour du joueur actuel.
+	 * Met fin au tour du joueur qui joue
 	 * On passe au joueur suivant si il y en a, sinon, le croupier joue.
 	 */
 	@FXML
 	private void actionEndSelfTurn() {
-		this.bbot.terminer(this.indexJoueursTab.get(this.currentPlayer));
+		this.blackbot.terminer(this.playersIndexTab.get(this.currentPlayer));
 		// Retire la mise en avant
 		getPlayerVBox(this.currentPlayer).getStyleClass().remove("currentplayer");
 		checkFin();
@@ -495,11 +502,11 @@ public class GameViewController implements Initializable {
 	 * Sinon on passe au joueur suivant
 	 */
 	private void checkFin() {
-		if (this.indexJoueursTab.size()-1 == this.currentPlayer) {
+		if (this.playersIndexTab.size()-1 == this.currentPlayer) {
 			tourCroupier();
 		} else {
 			this.currentPlayer ++;
-			this.dealerMessageLab.setText(this.nomJoueurs[this.indexJoueursTab.get(this.currentPlayer)] + " à toi de jouer");
+			this.dealerMessageLab.setText(this.playersName[this.playersIndexTab.get(this.currentPlayer)] + " " + this.resources.getString("message.turn"));
 			// Met en avant le joueur qui doit jouer
 			getPlayerVBox(this.currentPlayer).getStyleClass().add("currentplayer");
 		}
@@ -509,30 +516,38 @@ public class GameViewController implements Initializable {
 	 * Fait jouer le croupier, et afficher les gains de chaque joueur
 	 */
 	private void tourCroupier() {
-		this.butGetSelfCard.setDisable(true);
-		this.butEndSelfTurn.setDisable(true);
-		this.dealerHandTA.setText(cartesMain(bbot.getMainBanque()));
-		if (bbot.getMainBanque().isPerdante())
+		this.butDrawCard.setDisable(true);
+		this.butEndTurn.setDisable(true);
+		this.dealerHandTA.setText(handCards(blackbot.getMainBanque()));
+		if (blackbot.getMainBanque().isPerdante())
 			this.dealerHandTA.setDisable(true);
 		
-		for (int i = 0; i < this.indexJoueursTab.size(); i++) {
-			int indexPlayerTab = this.indexJoueursTab.get(i);
+		for (int i = 0; i < this.playersIndexTab.size(); i++) {
+			int indexPlayerTab = this.playersIndexTab.get(i);
 			getPlayerLabel(i).setText(
-						this.nomJoueurs[indexPlayerTab] + "\n" +
-						"Portefeuille : " + this.soldeJoueurs[indexPlayerTab] + "\n" +
-						"Gain : " + this.bbot.getGainJoueurs(indexPlayerTab));
-			this.soldeJoueurs[indexPlayerTab] += this.bbot.getGainJoueurs(indexPlayerTab);
+						this.playersName[indexPlayerTab] + "\n" +
+						this.resources.getString("wallet") + " : " + this.playersWallet[indexPlayerTab] + "\n" +
+						this.resources.getString("earnings") + " : " + this.blackbot.getGainJoueurs(indexPlayerTab));
+			this.playersWallet[indexPlayerTab] += this.blackbot.getGainJoueurs(indexPlayerTab);
 		}
 		
-		this.dealerMessageLab.setText("Manche terminée, vous pouvez récupérer vos gains");
-		this.butStart.setText("Récupérer gains");
+		this.dealerMessageLab.setText(this.resources.getString("message.end"));
+		this.butStart.setText(this.resources.getString("button.earnings"));
 		this.butStart.setDisable(false);
 		this.currentPlayer = 0;
 	}
 	
+	/** Méthode permettant de récupérer la VBox d'un joueur en fonction de son indice
+	 * @param index Indice du joueur
+	 * @return L'élement VBox correspondant
+	 */
+	private VBox getPlayerVBox(int indexPlayer) {
+		return (VBox) this.playersHBox.getChildren().get(indexPlayer);
+	}
+	
 	/** Méthode permettant de récupérer le Label d'un joueur en fonction de son indice
 	 * @param index Indice du joueur
-	 * @return L'élement Label
+	 * @return L'élement Label correspondant
 	 */
 	private Label getPlayerLabel(int indexPlayer) {
 		return (Label) getPlayerVBox(indexPlayer).getChildren().get(0);
@@ -540,72 +555,24 @@ public class GameViewController implements Initializable {
 	
 	/** Méthode permettant de récupérer la TextArea d'un joueur en fonction de son indice
 	 * @param index Indice du joueur
-	 * @return L'élement TextArea
+	 * @return L'élement TextArea correspondant
 	 */
 	private TextArea getPlayerTextArea(int indexPlayer) {
 		// En mode mise il y a un bouton en position 1, autrement il n'y en a pas
-		if (this.bbot.getEtat() == EtatBlackBot.MISE)
+		if (this.blackbot.getEtat() == EtatBlackBot.MISE)
 			return (TextArea) getPlayerVBox(indexPlayer).getChildren().get(2);
 		else
 			return (TextArea) getPlayerVBox(indexPlayer).getChildren().get(1);
 	}
 	
-	/** Méthode permettant de récupérer la VBox d'un joueur en fonction de son indice
-	 * @param index Indice du joueur
-	 * @return L'élement VBox
+	/** Détermine si l'utilisateur à créer un joueur
+	 * @return Vrai si au moins un joueur à un nom
 	 */
-	private VBox getPlayerVBox(int indexPlayer) {
-		return (VBox) this.playersHBox.getChildren().get(indexPlayer);
-	}
-	
-	/** Renvoie les cartes et le score d'un joueur sous une meilleur forme
-	 * @param pfMainJoueur Main du joueur
-	 * @return Le texte des cartes du joueur
-	 */
-	private String cartesMain(MainBlackjack pfMainJoueur) {
-		List<Carte> mainJoueur = pfMainJoueur.getCartes();
-		String cartesJoueur = "";
-		
-		for (int j = 0; j < mainJoueur.size(); j++) {
-			if (mainJoueur.get(j).getValeur() == 0) {
-				cartesJoueur += "A";
-			} else if (mainJoueur.get(j).getValeur() == 10) {
-				if (mainJoueur.get(j).getHauteur() == 9) {
-					cartesJoueur += "10";
-				} else if (mainJoueur.get(j).getHauteur() == 10) {
-					cartesJoueur += "J";
-				} else if (mainJoueur.get(j).getHauteur() == 11) {
-					cartesJoueur += "Q";
-				} else
-					cartesJoueur += "K";
-			} else {
-				cartesJoueur += mainJoueur.get(j).getValeur();
-			}
-			
-			if (mainJoueur.get(j).getCouleur() == 0)
-				cartesJoueur += "♠ ";
-			else if (mainJoueur.get(j).getCouleur() == 1)
-				cartesJoueur += "♥ ";
-			else if (mainJoueur.get(j).getCouleur() == 2)
-				cartesJoueur += "♣ ";
-			else
-				cartesJoueur += "♦ ";
-			
-			cartesJoueur += mainJoueur.get(j).getNomComptet() + "\n";
-		}
-		
-		return cartesJoueur + "\n" + pfMainJoueur.getScore() + " points";
-	}
-	
 	private boolean isPlaying() {
-		int sum = 0;
-		
-		for (int i = 0; i < soldeJoueurs.length; i++) {
-			sum += soldeJoueurs[i];
+		for (int i = 0; i < 7; i++) {
+			if (playersName[i] != null)
+				return true;
 		}
-		
-		if (sum > 0)
-			return true;
 		
 		return false;
 	}
@@ -613,12 +580,37 @@ public class GameViewController implements Initializable {
 	/**
 	 * Met à jour l'ArrayList des joueurs
 	 */
-	private void updateIndexPlayersTab() {
-		this.indexJoueursTab.clear();
+	private void updatePlayersIndexTab() {
+		this.playersIndexTab.clear();
 		for (int i = 0; i < 7; i ++) {
-			if (this.miseJoueurs[i] > 0) {
-				this.indexJoueursTab.add(i);
+			if (this.playersBet[i] > 0) {
+				this.playersIndexTab.add(i);
 			}
 		}
+	}
+	
+	/** Renvoie les cartes et le score d'un joueur
+	 * @param pfMainJoueur Main du joueur
+	 * @return Le texte des cartes du joueur
+	 */
+	private String handCards(MainBlackjack pfMainJoueur) {
+		List<Carte> playerHand = pfMainJoueur.getCartes();
+		String playerCards = "";
+
+		for (int j = 0; j < playerHand.size(); j++) {
+			
+			if (playerHand.get(j).getHauteur() == 0 || playerHand.get(j).getHauteur() > 9) {
+				playerCards += this.cardsName[playerHand.get(j).getHauteur()].charAt(0);
+			} else {
+				playerCards += playerHand.get(j).getValeur();
+			}
+			
+			playerCards += this.colorsSymbols[playerHand.get(j).getCouleur()] +
+							this.cardsName[playerHand.get(j).getHauteur()] +
+							resources.getString("card.between") +
+							this.colorsName[playerHand.get(j).getCouleur()] + "\n";
+		}
+		
+		return playerCards + "\n" + pfMainJoueur.getScore() + " points";
 	}
 }

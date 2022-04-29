@@ -15,28 +15,28 @@ import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 /**
+ * Classe contrôleur qui gère la fenêtre d'informations d'un joueur
  * @author Guibert Rémy
- * Classe contrôleur qui gère la fenètre d'informations d'un joueur
  */
-public class JoueurViewController implements Initializable {
+public class PlayerViewController implements Initializable {
 	
 	/**
 	 * Éléments dans le FXML
 	 */
 	@FXML
-	private TextField nomJoueurTextField;
+	private TextField playerName;
 	
 	@FXML
-	private Label portefeuilleLabel;
+	private Label walletLabel;
 	
 	@FXML
-	private Slider portefeuilleSlider;
+	private Slider walletSlider;
 	
 	@FXML
-	private Label miseLabel;
+	private Label betLabel;
 	
 	@FXML
-	private Slider miseSlider;
+	private Slider betSlider;
 	
 	@FXML
 	private VBox content;
@@ -44,20 +44,20 @@ public class JoueurViewController implements Initializable {
 	/**
 	 * Attributs de la classe
 	 */
-	private Stage primaryStage;
+	private Stage windowStage;
 	
 	private boolean isCanceled;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// Portefeuille
-		this.portefeuilleSlider.valueProperty().addListener( (obs, oldval, newval) -> this.portefeuilleSlider.setValue(newval.intValue()) );
-		Bindings.bindBidirectional(this.portefeuilleLabel.textProperty(), this.portefeuilleSlider.valueProperty(), new NumberStringConverter());
+		this.walletSlider.valueProperty().addListener( (obs, oldval, newval) -> this.walletSlider.setValue(newval.intValue()) );
+		Bindings.bindBidirectional(this.walletLabel.textProperty(), this.walletSlider.valueProperty(), new NumberStringConverter());
 		
 		// Mise
-		this.miseSlider.maxProperty().bind(this.portefeuilleSlider.valueProperty());
-		this.miseSlider.valueProperty().addListener( (obs, oldval, newval) -> this.miseSlider.setValue(newval.intValue()) );
-		Bindings.bindBidirectional(this.miseLabel.textProperty(), this.miseSlider.valueProperty(), new NumberStringConverter());
+		this.betSlider.maxProperty().bind(this.walletSlider.valueProperty());
+		this.betSlider.valueProperty().addListener( (obs, oldval, newval) -> this.betSlider.setValue(newval.intValue()) );
+		Bindings.bindBidirectional(this.betLabel.textProperty(), this.betSlider.valueProperty(), new NumberStringConverter());
 		
 		// Lie la touche Entrée à l'action de valider et la toucher Échap à l'action d'annuler
 		this.content.setOnKeyPressed( e -> { if (e.getCode().equals(KeyCode.ENTER))
@@ -66,12 +66,13 @@ public class JoueurViewController implements Initializable {
 												actionCancel(); } );
 	}
 	
-	/** Récupère le primaryStage du controlleur parent
-	 * @param pfStage
+	/** Récupère le Stage de la fenêtre
+	 * Sert plus tard pour fermer la fenêtre
+	 * @param pfStage Stage de la fenêtre
 	 */
-	public void setPrimaryStage(Stage pfStage) {
-		this.primaryStage = pfStage;
-		this.primaryStage.setOnCloseRequest( e -> actionCancel() );
+	public void setWindowStage(Stage stage) {
+		this.windowStage = stage;
+		this.windowStage.setOnCloseRequest( e -> actionCancel() );
 	}
 	
 	/** Permet de définir des valeurs par défaut à l'ouverture
@@ -80,11 +81,11 @@ public class JoueurViewController implements Initializable {
 	 * @param mise La mise du joueur
 	 */
 	public void setDefaultValues(String nom, int solde, int mise) {
-		this.nomJoueurTextField.setText(nom);
+		this.playerName.setText(nom);
 		if (solde > 10000)
-			this.portefeuilleSlider.setMax(solde);
-		this.portefeuilleSlider.setValue(solde);
-		this.miseSlider.setValue(mise);
+			this.walletSlider.setMax(solde);
+		this.walletSlider.setValue(solde);
+		this.betSlider.setValue(mise);
 	}
 	
 	/**
@@ -103,19 +104,19 @@ public class JoueurViewController implements Initializable {
 	@FXML
 	private void actionValidate() {
 		this.isCanceled = false;
-		this.primaryStage.close();
+		this.windowStage.close();
 	}
 	
 	/**
-	 * Informe que l'utilisateur a annuler et ferme la fenètre
+	 * Informe que l'utilisateur a annulé et ferme la fenètre
 	 */
 	@FXML
 	private void actionCancel() {
 		this.isCanceled = true;
-		this.primaryStage.close();
+		this.windowStage.close();
 	}
 	
-	/** Indique si l'utilisateur a annuler
+	/** Indique si l'utilisateur a annulé
 	 * @return Vrai si il a annulé, Faux sinon
 	 */
 	public boolean isCanceled() {
@@ -126,20 +127,20 @@ public class JoueurViewController implements Initializable {
 	 * @return Le contenu du TextField
 	 */
 	public String getNom() {
-		return this.nomJoueurTextField.getText();
+		return this.playerName.getText();
 	}
 	
 	/** Renvoit le solde entré
 	 * @return Le valeur du slider portefeuille
 	 */
 	public int getPortefeuille() {
-		return (int) this.portefeuilleSlider.getValue();
+		return (int) this.walletSlider.getValue();
 	}
 	
 	/** Renvoit la mise entrée
 	 * @return Le valeur du slider mise
 	 */
 	public int getMise() {
-		return (int) this.miseSlider.getValue();
+		return (int) this.betSlider.getValue();
 	}
 }

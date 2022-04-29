@@ -5,9 +5,14 @@
 
 /* MainView */
 .mainview {
-	-fx-background-image: url("titlescreen.png");
 	-fx-background-repeat: no-repeat;
 	-fx-background-color: rgb(1, 81, 20);
+}
+.mainview.fr {
+	-fx-background-image: url("titlescreen_fr.png");
+}
+.mainview.en {
+	-fx-background-image: url("titlescreen_en.png");
 }
 
 
@@ -62,14 +67,14 @@
 
 
 /* Menus */
-.menu-button .context-menu {
+.choice-box .context-menu, .menu .context-menu {
 	-fx-background-color: rgb(25, 95, 43);
 	-fx-background-radius: 5px;
 	-fx-border-color: rgb(18, 54, 13);
 	-fx-border-radius: 5px;
 	-fx-border-width: 2px;
 }
-.menu-button .radio-menu-item:focused, .menu-bar .menu-item:focused {
+.choice-box .radio-menu-item:focused, .menu .menu-item:focused {
 	-fx-background-color: rgb(14, 51, 23);
 }
 .mainview .menu-bar {

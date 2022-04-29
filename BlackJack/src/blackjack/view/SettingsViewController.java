@@ -1,27 +1,27 @@
 package blackjack.view;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import blackjack.Main;
+import blackjack.Util;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.HBox;
-import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 /**
+ * Classe contrôleur qui gère la fenêtre des paramètres
  * @author Guibert Rémy
- * Classe contrôleur qui gère la fenètre des paramètres
  */
 public class SettingsViewController implements Initializable {
 	
@@ -29,106 +29,153 @@ public class SettingsViewController implements Initializable {
 	 * Éléments dans le FXML
 	 */
 	@FXML
-	private HBox defaultBalance;
+	private Slider defaultBalanceSlider;
 	
 	@FXML
-	private HBox defaultBet;
+	private Label defaultBalanceLabel;
 	
 	@FXML
-	private HBox volume;
-
+	private Slider defaultBetSlider;
+	
 	@FXML
-	private ToggleGroup music;
+	private Label defaultBetLabel;
+	
+	@FXML
+	private ChoiceBox<String> music;
+	
+	@FXML
+	private Slider volumeSlider;
+	
+	@FXML
+	private Label volumeLabel;
+	
+	@FXML
+	private ChoiceBox<String> language;
 	
 	/**
 	 * Attributs de la classe
 	 */
-	private Main bj;
+	private Main main;
 	
+	private Stage primaryStage;
+	
+	private Stage windowStage;
+	
+	private DoubleProperty[] offsets;
+
 	private IntegerProperty[] settings;
 	
-	private MediaPlayer mediaPlayer;
+	private ObjectProperty<Locale> locale;
+	
+	private ObjectProperty<MediaPlayer> mediaPlayer;
+	
+	private ResourceBundle resources;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		this.resources = resources;
 	}
 	
-	/** Révupère l'instance du programme principal pour plus tard pouvoir changer de scène
-	 * @param pfBj l'objet Blackjack
+	/** Récupère l'instance du programme principal pour initialiser les objets
+	 * @param main L'objet Main
 	 */
-	public void setBj(Main pfBj) {
-		this.bj = pfBj;
+	public void initializeObjects(Main main) {
+		this.main = main;
 		
-		this.settings = this.bj.getSettings();
+		this.primaryStage = this.main.getPrimaryStage();
+		
+		this.offsets = this.main.getOffsets();
+		
+		this.settings = this.main.getSettings();
+		
+		this.locale = this.main.getLocale();
+		
+		this.mediaPlayer = this.main.getMediaPlayer();
 		
 		// Solde par défaut
-		Slider defaultBalanceSlider = (Slider) this.defaultBalance.getChildren().get(0);
-		Label defaultBalanceLabel = (Label) this.defaultBalance.getChildren().get(1);
-		Bindings.bindBidirectional(defaultBalanceLabel.textProperty(), this.settings[0], new NumberStringConverter());
-		defaultBalanceSlider.valueProperty().bindBidirectional(this.settings[0]);
+		this.defaultBalanceSlider.valueProperty().bindBidirectional(this.settings[0]);
+		Bindings.bindBidirectional(this.defaultBalanceLabel.textProperty(), this.settings[0], new NumberStringConverter());
 		
 		// Mise par défaut
-		Slider defaultBetSlider = (Slider) this.defaultBet.getChildren().get(0);
-		Label defaultBetLabel = (Label) this.defaultBet.getChildren().get(1);
-		defaultBetSlider.maxProperty().bind(defaultBalanceSlider.valueProperty());
-		defaultBetSlider.valueProperty().addListener( (obs, oldval, newval) -> { if (newval.intValue() == 0) defaultBetSlider.valueProperty().setValue(1); } );
-		Bindings.bindBidirectional(defaultBetLabel.textProperty(), this.settings[1], new NumberStringConverter());
-		defaultBetSlider.valueProperty().bindBidirectional(this.settings[1]);
-		
-		// Volume
-		Slider volumeSlider = (Slider) this.volume.getChildren().get(0);
-		Label volumeLabel = (Label) this.volume.getChildren().get(1);
-		Bindings.bindBidirectional(volumeLabel.textProperty(), this.settings[2], new NumberStringConverter());
-		volumeSlider.valueProperty().bindBidirectional(this.settings[2]);
+		this.defaultBetSlider.maxProperty().bind(this.settings[0]);
+		this.defaultBetSlider.valueProperty().addListener( (obs, oldval, newval) -> { if (newval.intValue() == 0) this.defaultBetSlider.valueProperty().setValue(1); } );
+		this.defaultBetSlider.valueProperty().bindBidirectional(this.settings[1]);;
+		Bindings.bindBidirectional(this.defaultBetLabel.textProperty(), this.settings[1], new NumberStringConverter());
 		
 		// Musique de fond
-		RadioMenuItem radioMusic = (RadioMenuItem) this.music.getToggles().get(this.settings[3].getValue());
-		radioMusic.setSelected(true);
+		this.music.getItems().setAll(this.resources.getString("music.original"), this.resources.getString("music.slowed"), this.resources.getString("music.jazz"));
+		this.music.getSelectionModel().select(this.settings[2].getValue());
+		this.settings[2].bind(this.music.getSelectionModel().selectedIndexProperty());
+		this.music.setOnAction( e -> actionMusic(this.settings[2].getValue()) );
+
+		// Volume
+		this.volumeSlider.valueProperty().bindBidirectional(this.settings[3]);;
+		Bindings.bindBidirectional(this.volumeLabel.textProperty(), this.settings[3], new NumberStringConverter());
 		
-		this.mediaPlayer = this.bj.getMediaPlayer();
+		// Langue
+		this.language.getItems().setAll(this.resources.getString("language.fr"), this.resources.getString("language.en"));
+		this.language.getSelectionModel().select(this.settings[4].getValue());
+		this.settings[4].bind(this.language.getSelectionModel().selectedIndexProperty());
+		this.language.setOnAction( e -> actionLanguage(this.settings[4].getValue()) );
+	}
+	
+	/** Quand les paramètres sont dans une fenêtre séparée,
+	 * on enregistre leur Stage pour être en mesure de le fermer
+	 * @param stage Le Stage de la fenêtre des paramètres
+	 */
+	public void setWindowStage(Stage stage) {
+		this.windowStage = stage;
+	}
+	
+	/** Change la langue de l'application
+	 * @param index Indice la langue
+	 */
+	private void actionLanguage(int index) {
+		if (index == 0) {
+			this.locale.setValue(new Locale("fr"));
+			
+		} else {
+			this.locale.setValue(new Locale("en"));
+		}
+
+		boolean isWindow = false;
+		if (this.windowStage != null) {
+			this.windowStage.close();
+			isWindow = true;
+		}
+		Util.loadSettingsView(this.main, this.primaryStage, this.locale.getValue(), this.offsets, isWindow);
 	}
 	
 	/**
-	 * Action liée aux RadioMenuItem permettant de charger la musique de fond choisie
+	 * Change la musique de fond en fonction de index, fonctionne seulement
+	 * si les paramètres ont été ouvert dans une nouvelle fenêtre
+	 * @param index Indice de la musique
 	 */
-	@FXML
-	private void actionMusic() {
-		this.mediaPlayer.stop();
-		RadioMenuItem rad = (RadioMenuItem) this.music.getSelectedToggle();
-		switch(rad.getText()) {
-			case("Originale"):
-				loadMusic("SM64DS Luigi's Casino Theme.m4a");
-				this.settings[3].setValue(0);
-				return;
-			case("Ralentie"):
-				loadMusic("SM64DS Luigi's Casino Theme Slowed & Reverb.m4a");
-				this.settings[3].setValue(1);
-				return;
-			case("Jazz"):
-				loadMusic("SM64DS Luigi’s Casino Theme Jazz Remix.m4a");
-				this.settings[3].setValue(2);
-				return;
+	private void actionMusic(int index) {
+		if (this.windowStage != null) {
+			String audio;
+			if (index == 0) {
+				audio = "SM64DS Luigi's Casino Theme.m4a";
+				
+			} else if (index == 1) {
+				audio = "SM64DS Luigi's Casino Theme Slowed & Reverb.m4a";
+				
+			} else {
+				audio = "SM64DS Luigi's Casino Theme Jazz Remix.m4a";
+			}
+			this.mediaPlayer.getValue().stop();
+			Util.loadMusic(this.mediaPlayer, audio, this.settings[3].getValue());
 		}
 	}
-	
-	/** Charge une musique dans le MediaPlayer
-	 * @param path Nom du ficher dans le package resource
-	 */
-	public void loadMusic(String path) {
-		Media media = new Media(Main.class.getResource("resource/"+path).toExternalForm());
-		this.mediaPlayer = new MediaPlayer(media);
-		this.mediaPlayer.play();
-		this.mediaPlayer.setCycleCount(Integer.MAX_VALUE);
-		DoubleProperty doubleProp = new SimpleDoubleProperty(0.5);
-		this.mediaPlayer.volumeProperty().bind(doubleProp);
-		this.settings[2].addListener( (obs, oldval, newval) -> doubleProp.setValue(newval.intValue()/100.0) );
-	}
-	
+
 	/**
-	 * Permet de retourner à l'écran d'accueil
+	 * Permet de retourner à l'écran titre, ou de fermer la fenêtre des paramètres
 	 */
 	@FXML
 	private void actionBack() {
-		this.bj.loadMainView();
+		if (this.windowStage != null)
+			this.windowStage.close();
+		else
+			Util.loadMainOrGameView(this.main, primaryStage, this.locale.getValue(), this.offsets, "Main");
 	}
 }

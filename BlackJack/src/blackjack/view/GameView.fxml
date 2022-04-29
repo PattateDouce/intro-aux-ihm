@@ -22,11 +22,11 @@
    <bottom>
       <ButtonBar nodeOrientation="RIGHT_TO_LEFT" prefHeight="50.0" BorderPane.alignment="CENTER">
         <buttons>
-          <Button fx:id="butEndSelfTurn" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionEndSelfTurn" styleClass="buttonGreenMedium" text="Terminer son tour" translateX="-5.0">
+          <Button fx:id="butEndTurn" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionEndSelfTurn" styleClass="buttonGreenMedium" text="%button.stand" translateX="-5.0">
           </Button>
-          <Button fx:id="butGetSelfCard" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionDrawACard" styleClass="buttonGreenMedium" text="Demander une carte" translateX="-5.0">
+          <Button fx:id="butDrawCard" alignment="CENTER" contentDisplay="CENTER" disable="true" mnemonicParsing="false" onAction="#actionDrawACard" styleClass="buttonGreenMedium" text="%button.hit" translateX="-5.0">
           </Button>
-          <Button fx:id="butStart" alignment="CENTER" contentDisplay="CENTER" disable="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#actionStart" prefWidth="300.0" styleClass="buttonGreenMedium" text="Lancer manche" translateX="-5.0">
+          <Button fx:id="butStart" alignment="CENTER" contentDisplay="CENTER" disable="true" maxWidth="-Infinity" mnemonicParsing="false" onAction="#actionStart" prefWidth="300.0" styleClass="buttonGreenMedium" text="%button.start" translateX="-5.0">
           </Button>
         </buttons>
          <BorderPane.margin>
@@ -37,10 +37,10 @@
    <top>
       <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
         <menus>
-            <Menu mnemonicParsing="false" text="Aide">
+            <Menu mnemonicParsing="false" text="%help">
               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#actionRules" text="Règles" />
-                <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="À propos de BlackJack" />
+                  <MenuItem mnemonicParsing="false" onAction="#actionRules" text="%rules" />
+                <MenuItem mnemonicParsing="false" onAction="#actionAbout" text="%about" />
               </items>
             </Menu>
         </menus>
@@ -59,7 +59,7 @@
                   <RowConstraints />
               </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" onAction="#actionGoBackToMain" prefWidth="124.0" styleClass="buttonGreenMedium" text="Retour" textAlignment="CENTER" translateY="-84.0">
+                  <Button mnemonicParsing="false" onAction="#actionBack" prefWidth="124.0" styleClass="buttonGreenMedium" text="%button.back" textAlignment="CENTER" translateY="-84.0">
                      <GridPane.margin>
                         <Insets left="7.0" />
                      </GridPane.margin>
@@ -73,14 +73,14 @@
                         <Image url="@../resource/bulle.png" />
                      </image>
                   </ImageView>
-                  <Label fx:id="dealerMessageLab" alignment="CENTER" contentDisplay="CENTER" prefHeight="75.0" prefWidth="210.0" styleClass="croupier" text="Au moins un joueur doit miser pour lancer une manche" textAlignment="CENTER" translateX="140.0" translateY="25.0" wrapText="true">
+                  <Label fx:id="dealerMessageLab" alignment="CENTER" contentDisplay="CENTER" prefHeight="75.0" prefWidth="200.0" styleClass="croupier" text="%message.default" textAlignment="CENTER" translateX="145.0" translateY="25.0" wrapText="true">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
                   <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                      <children>
-                        <Label fx:id="dealerHandLab" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="284.0" styleClass="croupierLabB" text="Main du croupier" textAlignment="CENTER" textFill="#ffffffe5" visible="false">
+                        <Label fx:id="dealerHandLab" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="284.0" styleClass="croupierLabB" text="%dealer.hand" textAlignment="CENTER" textFill="#ffffffe5" visible="false">
                            <VBox.margin>
                               <Insets left="36.0" top="9.0" />
                            </VBox.margin>
