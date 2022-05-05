@@ -28,8 +28,8 @@ public class Main extends Application {
 	
 	private final DoubleProperty[] offsets = {new SimpleDoubleProperty(-1), new SimpleDoubleProperty(-1)};
 	
-	private final IntegerProperty[] settings = {new SimpleIntegerProperty(1050), // Solde par défaut
-										  new SimpleIntegerProperty(151), // Mise par défaut
+	private final IntegerProperty[] settings = {new SimpleIntegerProperty(1000), // Solde par défaut
+										  new SimpleIntegerProperty(100), // Mise par défaut
 										  new SimpleIntegerProperty(1), // Musique d'arrière plan
 										  new SimpleIntegerProperty(25), // Volume
 										  new SimpleIntegerProperty(0)}; // Langue

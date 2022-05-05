@@ -176,6 +176,6 @@ public class SettingsViewController implements Initializable {
 		if (this.windowStage != null)
 			this.windowStage.close();
 		else
-			Util.loadMainOrGameView(this.main, primaryStage, this.locale.getValue(), this.offsets, "Main");
+			Util.loadMainOrGameView(this.main, this.primaryStage, this.locale.getValue(), this.offsets, "Main");
 	}
 }
